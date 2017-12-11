@@ -1,13 +1,14 @@
 /**
- * src/usbserial.cpp
+ * src/serial/usbserial.cpp
  * 
  * Code for Serial (serial over USB) interactions with the FMS
  * 
  * @author Connor Henley
  */
 #include "usbser_constants.hpp"
+#include "usbserial.hpp"
 
-#include <Serial.h>
+#include <Arduino.h>
 
 /**
  * @inherit-doc
@@ -22,9 +23,9 @@ void init_usbser() {
 void send_usbser(char * data) {
   while (true) {
     // See if Serial is available
-    if (Serial.available()) {
-      Serial.print(NEWLINE);
+    if (Serial.availableForWrite()) {
       Serial.print(data);
+      Serial.print(NEWLINE);
     } else {
       delay(10); // Delay to let the Serial data transmit
     }

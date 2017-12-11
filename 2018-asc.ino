@@ -5,8 +5,9 @@
  * 
  * @author Connor Henley, @thatging3rkid
  */
+#include "pins.h"
 #include "i2c.hpp"
-#include "usbserial.cpp"
+#include "usbserial.hpp"
 
 void setup() {
   // Initialize serial connections
@@ -17,6 +18,15 @@ void setup() {
 }
 
 void loop() {
+  // See if there is incoming data (there should almost never be)
+  if (Serial.available() > 0) {
+    // handle it?
+  } else {
+    // Normal handling
+    // Start by getting controller data sent and write it to Serial
+    process_i2c(&send_usbser);
+    
+  }
   
 }
 

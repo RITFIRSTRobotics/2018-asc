@@ -1,5 +1,5 @@
 /**
- * src/usbserial.hpp
+ * src/serial/usbserial.hpp
  * 
  * Code for Serial (serial over USB) interactions with the FMS
  * 

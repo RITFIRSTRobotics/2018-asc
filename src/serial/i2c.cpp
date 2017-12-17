@@ -14,6 +14,7 @@
  */
 void init_i2c() {
   Wire.begin(); // master does not need an address
+  Wire.setClock(400000L); // go fast
 }
 
 /**

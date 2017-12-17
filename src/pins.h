@@ -21,5 +21,10 @@
 #define LED_HEADER_G 0
 #define LED_HEADER_B 0
 
+// Debugging LED
+#define DLED_R 0
+#define DLED_G 0
+#define DLED_B 0
+
 #endif
 

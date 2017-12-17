@@ -7,6 +7,7 @@
  */
 #include "pins.h"
 #include "i2c.hpp"
+#include "scoring.hpp"
 #include "usbserial.hpp"
 
 void setup() {
@@ -15,6 +16,7 @@ void setup() {
   init_i2c();
 
   // Initialize pins
+  init_scoring();
 }
 
 void loop() {

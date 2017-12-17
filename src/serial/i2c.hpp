@@ -15,6 +15,8 @@ void init_i2c();
 
 /**
  * Get data from all the controllers and write it using the given function pointer
+ * 
+ * @param swrite a function to write the data (without a newline) to
  */
 void process_i2c(void (*swrite)(char *));
 

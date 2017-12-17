@@ -4,3 +4,4 @@ src/
 2018-asc.ino
 core/serial/usbser_constants.hpp
 core/i2c/i2c_constants.hpp
+.\core\utils\game.h

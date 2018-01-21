@@ -129,5 +129,6 @@ void loop() {
     // Next, handle scoring
     process_scoring(&send_usbser);
   }
+  delay(100);
 }
 

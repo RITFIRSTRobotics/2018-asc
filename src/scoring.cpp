@@ -11,6 +11,7 @@
 #include "usbser_constants.hpp"
 
 #include <stdio.h>
+#include <string.h>
 #include <Arduino.h>
 
 // Store the threshold needed for a goal to be detected
@@ -62,6 +63,8 @@ void update_threshold(uint8_t goal_num) {
 void process_scoring(void (*swrite)(char *)) {
   // Check each goal, can't really loop in case the pins aren't in order (unknown at the time of writing)
   char buffer[8];
+  memset(buffer, 0, 8); // clear the buffer
+
   if (analogRead(SCORE_SENSOR0) <= _goal0_threshold) {
     if (!_goal0_prev) {
       // Print data to a buffer, then use the given function

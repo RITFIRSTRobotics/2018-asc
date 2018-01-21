@@ -8,6 +8,7 @@
 #include "usbser_constants.hpp"
 #include "usbserial.hpp"
 
+#include <stdlib.h>
 #include <Arduino.h>
 
 /**
@@ -21,11 +22,17 @@ void init_usbser() {
  * @inherit-doc
  */
 void send_usbser(char * data) {
+  // Make sure the string is not empty (and exists)
+  if (data == NULL || data[0] == 0) {
+    return;
+  }
+  
   while (true) {
     // See if Serial is available
     if (Serial.availableForWrite()) {
       Serial.print(data);
       Serial.print(NEWLINE);
+      break;
     } else {
       delay(10); // Delay to let the Serial data transmit
     }

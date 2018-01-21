@@ -8,6 +8,7 @@
 #include "i2c_constants.hpp"
 
 #include <Wire.h>
+#include <string.h>
 
 /**
  * @inherit-doc
@@ -27,6 +28,7 @@ void process_i2c(void (*swrite)(char *)) {
 
     // Make a buffer to fill
     char buffer[I2CDATA_BUFFER_LEN];
+    memset(buffer, 0, I2CDATA_BUFFER_LEN); // clear out the buffer before starting
     int j = 0;
     
     // Read in data (into the buffer)

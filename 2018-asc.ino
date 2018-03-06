@@ -20,8 +20,7 @@ static AllianceColor _color;
 void setup() {
   // Initialize serial connections
   init_usbser();
-  init_i2c();
-
+  
   // Initialize pins
   init_scoring();
   pinMode(DLED_R, OUTPUT);
@@ -74,9 +73,9 @@ void setup() {
         // Check alliance color
         if (buffer[3] == 'r' || buffer[3] == 'R') {
           _color = RED;
-          analogWrite(DLED_R, 220);
+          analogWrite(DLED_R, 255);
           analogWrite(DLED_G, 0);
-          analogWrite(DLED_B, 5);
+          analogWrite(DLED_B, 0);
           Serial.write(INIT_RESPONSE);
           Serial.write(NEWLINE);
           break;
@@ -85,7 +84,7 @@ void setup() {
           _color = BLUE;
           analogWrite(DLED_R, 0);
           analogWrite(DLED_G, 0);
-          analogWrite(DLED_B, 230);
+          analogWrite(DLED_B, 255);
           Serial.write(INIT_RESPONSE);
           Serial.write(NEWLINE);
           break;
@@ -100,6 +99,9 @@ void setup() {
       delay(20);
     }
   }
+
+  // Initalize i2c at the end (allow for the controllers to boot fully before making an address list)
+  init_i2c();
 }
 
 void loop() {

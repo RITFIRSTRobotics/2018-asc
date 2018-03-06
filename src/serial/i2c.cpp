@@ -7,7 +7,7 @@
  */
 #include "i2c_constants.hpp"
 
-#include "pins.h"
+#include "debug_led.hpp"
 
 #include <Wire.h>
 #include <limits.h>
@@ -34,13 +34,11 @@ void init_i2c() {
       addresses[i] = address;
     } else {
       addresses[i] = UCHAR_MAX;
-      // set the debug LED to yellow
-      analogWrite(DLED_R, 255);
-      analogWrite(DLED_G, 255);
-      analogWrite(DLED_B, 0);
+      // set the debug LED to yellow (and wait)
+      set_led(255, 255, 0, 400);
     }
 
-    delay(200); // wait a bit before the next hit
+    delay(200); // wait a little
   }
 }
 

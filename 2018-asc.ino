@@ -8,6 +8,7 @@
 #include "pins.h"
 #include "i2c.hpp"
 #include "scoring.hpp"
+#include "debug_led.hpp"
 #include "usbserial.hpp"
 #include "usbser_constants.hpp"
 
@@ -23,9 +24,7 @@ void setup() {
   
   // Initialize pins
   init_scoring();
-  pinMode(DLED_R, OUTPUT);
-  pinMode(DLED_G, OUTPUT);
-  pinMode(DLED_B, OUTPUT);
+  init_led();
 
   // Wait for serial to startup
   while (!Serial) {;;}
@@ -73,18 +72,14 @@ void setup() {
         // Check alliance color
         if (buffer[3] == 'r' || buffer[3] == 'R') {
           _color = RED;
-          analogWrite(DLED_R, 255);
-          analogWrite(DLED_G, 0);
-          analogWrite(DLED_B, 0);
+          set_led(255, 0, 0);
           Serial.write(INIT_RESPONSE);
           Serial.write(NEWLINE);
           break;
         }
         if (buffer[3] == 'b' || buffer[3] == 'B') {
           _color = BLUE;
-          analogWrite(DLED_R, 0);
-          analogWrite(DLED_G, 0);
-          analogWrite(DLED_B, 255);
+          set_led(0, 0, 255);
           Serial.write(INIT_RESPONSE);
           Serial.write(NEWLINE);
           break;

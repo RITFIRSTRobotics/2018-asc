@@ -64,7 +64,6 @@ void process_scoring(void (*swrite)(char *)) {
   // Check each goal, can't really loop in case the pins aren't in order (unknown at the time of writing)
   char buffer[8];
   memset(buffer, 0, 8); // clear the buffer
-  Serial.println(analogRead(SCORE_SENSOR0));
 
   if (analogRead(SCORE_SENSOR0) <= _goal0_threshold) {
     if (!_goal0_prev) {

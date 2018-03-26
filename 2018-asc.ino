@@ -13,8 +13,11 @@
 #include "usbser_constants.hpp"
 
 #include <math.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+
+#define SERIAL_BUFFER_SIZE 128
 
 static AllianceColor _color;
 
@@ -100,16 +103,16 @@ void setup() {
 }
 
 void loop() {
-  // See if there is incoming data (there should almost never be)
+  // See if there is incoming data
   if (Serial.available() > 0) {
     // Make a buffer and read data into it
-    char buffer[64];
+    char buffer[SERIAL_BUFFER_SIZE];
     size_t j = 0;
     char in;
     while ((in = Serial.read()) != -1) {
       buffer[j] = in;
       j += 1;
-      if (in == '\n') {
+      if (in == '\n' || j > SERIAL_BUFFER_SIZE) {
         break;
       }
     }
@@ -118,7 +121,25 @@ void loop() {
     if (strlen(buffer) > 3 && buffer[0] == CALIBRATE_MESSAGE[0] && buffer[1] == CALIBRATE_MESSAGE[1]) {
       // Calibrate the specified goal
       update_threshold(buffer[3] - '0');
-    }    
+    }
+    // See if an LED strip command had been sent
+    else if (strlen(buffer) > 4 && buffer[0] == LED_STRIP_DATA[0] && buffer[1] == LED_STRIP_DATA[1] && buffer[2] == LED_STRIP_DATA[2]) {
+      // Need to parse the data in using sscanf
+      uint8_t strip_r, strip_g, strip_b = 0;
+      sscanf(buffer, LED_STRIP_DATA, &strip_r, &strip_g, &strip_b);
+
+      // Once parsed, send it
+      set_led_strip(strip_r, strip_g, strip_b);
+    }
+    // See if a fan command has been sent
+    else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
+      // Parse in the data
+      uint8_t motor_val = 0;
+      sscanf(buffer, BALL_RETURN_CONTROL, &motor_val);
+
+      // Once parsed, send it
+      set_ball_fan(motor_val);
+    }
   } else {
     // Normal handling
     // Start by getting controller data sent and write it to Serial

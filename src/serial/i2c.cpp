@@ -35,10 +35,10 @@ void init_i2c() {
     } else {
       addresses[i] = UCHAR_MAX;
       // set the debug LED to yellow (and wait)
-      set_led(255, 255, 0, 400);
+      set_led(255, 255, 0, 600);
     }
 
-    delay(200); // wait a little
+    delay(300); // wait a little
   }
 }
 

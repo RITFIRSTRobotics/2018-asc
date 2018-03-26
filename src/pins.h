@@ -11,20 +11,20 @@
 #include "game.h"
 
 // Scoring sensors
-#define SCORE_SENSOR0 A0
-#define SCORE_SENSOR1 A0
-#define SCORE_SENSOR2 A0
-#define SCORE_SENSOR3 A0
+#define SCORE_SENSOR0 A11
+#define SCORE_SENSOR1 A12
+#define SCORE_SENSOR2 A13
+#define SCORE_SENSOR3 A14
 
 // LED headers
-#define LED_HEADER_R 0
-#define LED_HEADER_G 0
-#define LED_HEADER_B 0
+#define LED_HEADER_R 6
+#define LED_HEADER_G 5
+#define LED_HEADER_B 7
 
 // Debugging LED
-#define DLED_R 0
-#define DLED_G 0
-#define DLED_B 0
+#define DLED_R 8
+#define DLED_G 10
+#define DLED_B 9
 
 #endif
 

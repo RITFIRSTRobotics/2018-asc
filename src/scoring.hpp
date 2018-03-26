@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#define DEFAULT_THRESHOLD 512
+#define DEFAULT_THRESHOLD 400
 #define THRESHOLD_MULTIPLIER 1.2
 
 /**

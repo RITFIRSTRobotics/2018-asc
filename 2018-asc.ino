@@ -56,13 +56,13 @@ void setup() {
     // See if Serial can be read yet
     if (Serial.available() > 0) {
       // Read Serial into a buffer
-      char buffer[32];
+      char buffer[64];
       size_t j = 0;
       char in;
       while ((in = Serial.read()) != -1) {
         buffer[j] = in;
         j += 1;
-        if (in == '\n') {
+        if (in == '\n' || j > 64) {
           break;
         }
       }

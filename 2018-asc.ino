@@ -9,7 +9,9 @@
 #include "i2c.hpp"
 #include "scoring.hpp"
 #include "debug_led.hpp"
+#include "led_strip.hpp"
 #include "usbserial.hpp"
+#include "fan_control.hpp"
 #include "usbser_constants.hpp"
 
 #include <math.h>
@@ -28,6 +30,8 @@ void setup() {
   // Initialize pins
   init_scoring();
   init_led();
+  init_fans();
+  init_led_strip();
 
   // Wait for serial to startup
   while (!Serial) {;;}
@@ -134,11 +138,11 @@ void loop() {
     // See if a fan command has been sent
     else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
       // Parse in the data
-      uint8_t motor_val = 0;
-      sscanf(buffer, BALL_RETURN_CONTROL, &motor_val);
+      uint8_t fan_num, motor_val = 0;
+      sscanf(buffer, BALL_RETURN_CONTROL, &fan_num, &motor_val);
 
       // Once parsed, send it
-      set_ball_fan(motor_val);
+      set_ball_fan(fan_num, motor_val);
     }
   } else {
     // Normal handling

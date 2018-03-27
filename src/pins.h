@@ -10,6 +10,8 @@
 
 #include "game.h"
 
+#include <stdint.h>
+
 // Scoring sensors
 #define SCORE_SENSOR0 A11
 #define SCORE_SENSOR1 A12
@@ -25,6 +27,14 @@
 #define DLED_R 8
 #define DLED_G 10
 #define DLED_B 9
+
+// Fan control pins
+#define FAN_PWM0 11
+#define FAN_PWM1 12
+#define FAN_PWM2 13
+#define FAN_PWM3 14
+
+const uint8_t FAN_PWM_PINS[] = {FAN_PWM0, FAN_PWM1, FAN_PWM2, FAN_PWM3};
 
 #endif
 

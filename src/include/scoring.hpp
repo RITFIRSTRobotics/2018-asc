@@ -1,5 +1,5 @@
 /**
- * src/scoring.hpp
+ * src/include/scoring.hpp
  * 
  * Code for the scoring subsystem of the ASC
  * 

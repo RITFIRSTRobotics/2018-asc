@@ -127,13 +127,32 @@ void loop() {
       update_threshold(buffer[3] - '0');
     }
     // See if an LED strip command had been sent
-    else if (strlen(buffer) > 4 && buffer[0] == LED_STRIP_DATA[0] && buffer[1] == LED_STRIP_DATA[1] && buffer[2] == LED_STRIP_DATA[2]) {
-      // Need to parse the data in using sscanf
-      uint8_t strip_r, strip_g, strip_b = 0;
-      sscanf(buffer, LED_STRIP_DATA, &strip_r, &strip_g, &strip_b);
+    else if (strlen(buffer) > 8 && buffer[0] == LED_STRIP_SOLID[0]) {
+      if (buffer[1] == LED_STRIP_SOLID[1]) {
+        // Need to parse the data in using sscanf
+        char location;
+        uint8_t strip_r, strip_g, strip_b = 0;
+        sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
 
-      // Once parsed, send it
-      set_led_strip(strip_r, strip_g, strip_b);
+        // Once parsed, send it
+        set_led_strip_solid(location, strip_r, strip_g, strip_b);
+      } else if (buffer[1] == LED_STRIP_WAVE[1]) {
+        // Need to parse the data in using sscanf
+        char location;
+        uint8_t strip_r, strip_g, strip_b = 0;
+        sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
+
+        // Once parsed, send it
+        set_led_strip_wave(location, strip_r, strip_g, strip_b);
+      } else if (buffer[1] == LED_STRIP_NUM[1]) {
+        // Need to parse the data in using sscanf
+        char location;
+        uint8_t num, strip_r, strip_g, strip_b = 0;
+        sscanf(buffer, LED_STRIP_NUM, &location, &num, &strip_r, &strip_g, &strip_b);
+
+        // Once parsed, send it
+        set_led_strip_part(location, num, strip_r, strip_g, strip_b);        
+      }
     }
     // See if a fan command has been sent
     else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
@@ -144,13 +163,14 @@ void loop() {
       // Once parsed, send it
       set_ball_fan(fan_num, motor_val);
     }
-  } else {
-    // Normal handling
-    // Start by getting controller data sent and write it to Serial
-    process_i2c(&send_usbser);
-    // Next, handle scoring
-    process_scoring(&send_usbser);
   }
-  delay(100);
+  
+  // Normal handling
+  // Start by getting controller data sent and write it to Serial
+  process_i2c(&send_usbser);
+  
+  // Next, handle scoring
+  process_scoring(&send_usbser);
+  delay(50); // might need to cut this down more
 }
 

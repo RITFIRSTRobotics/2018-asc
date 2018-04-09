@@ -19,9 +19,7 @@
 #define SCORE_SENSOR3 A14
 
 // LED headers
-#define LED_HEADER_R 6
-#define LED_HEADER_G 5
-#define LED_HEADER_B 7
+#define LED_STRIP_CONTROL 4
 
 // Debugging LED
 #define DLED_R 8

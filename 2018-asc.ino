@@ -128,31 +128,24 @@ void loop() {
     }
     // See if an LED strip command had been sent
     else if (strlen(buffer) > 8 && buffer[0] == LED_STRIP_SOLID[0]) {
+      char location;
+      uint32_t num, strip_r, strip_g, strip_b = 0;
       if (buffer[1] == LED_STRIP_SOLID[1]) {
         // Need to parse the data in using sscanf
-        char location;
-        uint32_t strip_r, strip_g, strip_b = 0;
         sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
-        Serial.println(buffer);
-
-        // Once parsed, send it
         set_led_strip_solid(location, strip_r, strip_g, strip_b);
       } else if (buffer[1] == LED_STRIP_WAVE[1]) {
         // Need to parse the data in using sscanf
-        char location;
-        uint32_t strip_r, strip_g, strip_b = 0;
-        sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
-
-        // Once parsed, send it
+        sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b)
         set_led_strip_wave(location, strip_r, strip_g, strip_b);
       } else if (buffer[1] == LED_STRIP_NUM[1]) {
         // Need to parse the data in using sscanf
-        char location;
-        uint32_t num, strip_r, strip_g, strip_b = 0;
         sscanf(buffer, LED_STRIP_NUM, &location, &num, &strip_r, &strip_g, &strip_b);
-
-        // Once parsed, send it
         set_led_strip_part(location, num, strip_r, strip_g, strip_b);        
+      } else if (buffer[1] == LED_STRIP_ONE[1]) {
+        // Need to parse the data in using sscanf
+        sscanf(buffer, LED_STRIP_ONE, &num, &strip_r, &strip_g, &strip_b);
+        set_led_strip_one(num, strip_r, strip_g, strip_b);        
       }
     }
     // See if a fan command has been sent

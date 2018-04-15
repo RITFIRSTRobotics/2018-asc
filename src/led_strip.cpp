@@ -108,3 +108,11 @@ void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_
   }
 }
 
+/**
+ * @inherit-doc
+ */
+void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
+  strip.setPixelColor(num, r, g, b);
+  strip.show();  
+}
+

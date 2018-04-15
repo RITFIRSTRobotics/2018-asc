@@ -46,5 +46,15 @@ void set_led_strip_wave(char location, uint8_t r, uint8_t g, uint8_t b);
  */
 void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_t b);
 
+/**
+ * Set part of the LED strip to a color
+ * 
+ * @param num the number of the LED to change
+ * @param r red value
+ * @param g green value
+ * @param b blue value
+ */
+void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
+
 #endif
 

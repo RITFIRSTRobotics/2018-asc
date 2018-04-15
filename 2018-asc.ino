@@ -131,15 +131,16 @@ void loop() {
       if (buffer[1] == LED_STRIP_SOLID[1]) {
         // Need to parse the data in using sscanf
         char location;
-        uint8_t strip_r, strip_g, strip_b = 0;
+        uint32_t strip_r, strip_g, strip_b = 0;
         sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
+        Serial.println(buffer);
 
         // Once parsed, send it
         set_led_strip_solid(location, strip_r, strip_g, strip_b);
       } else if (buffer[1] == LED_STRIP_WAVE[1]) {
         // Need to parse the data in using sscanf
         char location;
-        uint8_t strip_r, strip_g, strip_b = 0;
+        uint32_t strip_r, strip_g, strip_b = 0;
         sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
 
         // Once parsed, send it
@@ -147,7 +148,7 @@ void loop() {
       } else if (buffer[1] == LED_STRIP_NUM[1]) {
         // Need to parse the data in using sscanf
         char location;
-        uint8_t num, strip_r, strip_g, strip_b = 0;
+        uint32_t num, strip_r, strip_g, strip_b = 0;
         sscanf(buffer, LED_STRIP_NUM, &location, &num, &strip_r, &strip_g, &strip_b);
 
         // Once parsed, send it

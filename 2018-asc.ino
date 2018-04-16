@@ -147,15 +147,25 @@ void loop() {
         sscanf(buffer, LED_STRIP_ONE, &num, &strip_r, &strip_g, &strip_b);
         set_led_strip_one(num, strip_r, strip_g, strip_b);        
       }
-    }
+    
     // See if a fan command has been sent
-    else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
+    } else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
       // Parse in the data
       uint8_t fan_num, motor_val = 0;
       sscanf(buffer, BALL_RETURN_CONTROL, &fan_num, &motor_val);
 
       // Once parsed, send it
       set_ball_fan(fan_num, motor_val);
+    // See if someone tried to reinitialize the ASC
+    } else if (strlen(buffer) > 3 && ((buffer[0] == INIT_MESSAGE[0] && buffer[1] == INIT_MESSAGE[1]) || (buffer[0] == BLINK_MESSAGE[0] && buffer[1] == BLINK_MESSAGE[1]))) {
+      // Blink the LED
+      set_led(0, 0, 0);
+      for (int i = 0; i < 3; i += 1) {
+        set_led(255, 255, 255, 200);
+        set_led(0, 0, 0, 300);
+      }
+
+      _reset();
     }
   }
   
@@ -166,5 +176,9 @@ void loop() {
   // Next, handle scoring
   process_scoring(&send_usbser);
   delay(50); // might need to cut this down more
+}
+
+static void _reset() {
+  asm volatile ("  jmp 0");
 }
 

@@ -136,7 +136,7 @@ void loop() {
         set_led_strip_solid(location, strip_r, strip_g, strip_b);
       } else if (buffer[1] == LED_STRIP_WAVE[1]) {
         // Need to parse the data in using sscanf
-        sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b)
+        sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
         set_led_strip_wave(location, strip_r, strip_g, strip_b);
       } else if (buffer[1] == LED_STRIP_NUM[1]) {
         // Need to parse the data in using sscanf

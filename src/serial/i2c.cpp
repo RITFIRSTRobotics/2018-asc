@@ -14,14 +14,32 @@
 #include <string.h>
 #include <Arduino.h>
 
-static uint8_t addresses[] = {0x10, 0x11, 0x12}; // should move this to #defines
+static uint8_t addresses[3];
 
 /**
  * @inherit-doc
  */
 void init_i2c() {
   Wire.begin(); // master does not need an address
-  Wire.setClock(400000L); // go fast
+  Wire.setClock(200000L); // go fast
+  
+  // Try to connect to all the addresses and if it's a valid address, then record it
+  for (int i = 0; i < 3; i += 1) {
+    uint8_t address = BASE_ADDR + i;
+    Wire.beginTransmission(address);
+    uint8_t error = Wire.endTransmission();
+    
+    // Check the return code, 0 means it's valid
+    if (error == 0) {
+      addresses[i] = address;
+    } else {
+      addresses[i] = UCHAR_MAX;
+      // set the debug LED to yellow (and wait)
+      set_led(255, 255, 255, 600);
+    }
+
+    delay(300); // wait a little
+  }
 }
 
 /**

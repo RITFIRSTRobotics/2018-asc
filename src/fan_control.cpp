@@ -14,7 +14,7 @@
  */
 void init_fans() {
   // Loop over all the fan pins
-  for (int i = 0; i < sizeof(FAN_PWM_PINS); i += 1) {
+  for (int i = 0; i < (int) sizeof(FAN_PWM_PINS); i += 1) {
     pinMode(FAN_PWM_PINS[i], OUTPUT);
   }
 }

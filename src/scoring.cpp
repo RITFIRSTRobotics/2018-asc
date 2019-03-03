@@ -65,7 +65,7 @@ void process_scoring(void (*swrite)(char *)) {
   char buffer[8];
   memset(buffer, 0, 8); // clear the buffer
 
-  if (analogRead(SCORE_SENSOR0) <= _goal0_threshold) {
+  if ((uint16_t) analogRead(SCORE_SENSOR0) <= _goal0_threshold) {
     if (!_goal0_prev) {
       // Print data to a buffer, then use the given function
       sprintf(buffer, SCORE_DATA, 0);
@@ -76,7 +76,7 @@ void process_scoring(void (*swrite)(char *)) {
     _goal0_prev = false;
   }
   
-  if (analogRead(SCORE_SENSOR1) <= _goal1_threshold) {
+  if ((uint16_t) analogRead(SCORE_SENSOR1) <= _goal1_threshold) {
     if (!_goal1_prev) {
       // Print data to a buffer, then use the given function
       sprintf(buffer, SCORE_DATA, 1);
@@ -87,7 +87,7 @@ void process_scoring(void (*swrite)(char *)) {
     _goal1_prev = false;
   }
   
-  if (analogRead(SCORE_SENSOR2) <= _goal2_threshold) {
+  if ((uint16_t) analogRead(SCORE_SENSOR2) <= _goal2_threshold) {
     if (!_goal2_prev) {
       // Print data to a buffer, then use the given function
       sprintf(buffer, SCORE_DATA, 2);
@@ -98,7 +98,7 @@ void process_scoring(void (*swrite)(char *)) {
     _goal2_prev = false;
   }
   
-  if (analogRead(SCORE_SENSOR3) <= _goal3_threshold) {
+  if ((uint16_t) analogRead(SCORE_SENSOR3) <= _goal3_threshold) {
     if (!_goal3_prev) {
       // Print data to a buffer, then use the given function
       sprintf(buffer, SCORE_DATA, 3);

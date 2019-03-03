@@ -25,7 +25,7 @@ static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, N
  *       this is not a suitable method for really short or long delays
  */
 static void delay_alt(long ms) {
-  long goaltime = millis() + ms;
+  uint64_t goaltime = millis() + ms;
   // Start by getting controller data sent and write it to Serial
   process_i2c(&send_usbser);
   

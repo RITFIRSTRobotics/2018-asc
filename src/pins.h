@@ -11,6 +11,7 @@
 #include "game.h"
 
 #include <stdint.h>
+#include <Arduino.h>
 
 // Scoring sensors
 #define SCORE_SENSOR0 A11

@@ -63,38 +63,43 @@ void setup() {
     // See if Serial can be read yet
     if (Serial.available() > 0) {
       // Read Serial into a buffer
-      char buffer[64];
+      char buffer[SERIAL_BUFFER_SIZE];
       size_t j = 0;
       char in;
       while ((in = Serial.read()) != -1) {
         buffer[j] = in;
         j += 1;
-        if (in == '\n' || j > 64) {
+        if (in == '\n' || j > SERIAL_BUFFER_SIZE) {
           break;
         }
       }
 
       // Check and see if the data is right
-      if (strlen(buffer) > 3 && buffer[0] == INIT_MESSAGE[0] && buffer[1] == INIT_MESSAGE[1]) {
+      char c1;
+      if (sscanf(buffer, INIT_MESSAGE, &c1) == 1) {
         // Check alliance color
-        if (buffer[3] == 'r' || buffer[3] == 'R') {
+        if (tolower(c1) == 'r') {
           _color = RED;
           set_led(255, 0, 0);
-          Serial.write(INIT_RESPONSE);
+          memset(buffer, 0, SERIAL_BUFFER_SIZE);
+          sprintf(buffer, INIT_RESPONSE, 0);
+          Serial.write(buffer);
+          Serial.write(NEWLINE);
+          break;
+        } else if (tolower(c1) == 'b') {
+          _color = BLUE;
+          set_led(0, 0, 255);
+          memset(buffer, 0, SERIAL_BUFFER_SIZE);
+          sprintf(buffer, INIT_RESPONSE, 0);
+          Serial.write(buffer);
           Serial.write(NEWLINE);
           break;
         }
-        if (buffer[3] == 'b' || buffer[3] == 'B') {
-          _color = BLUE;
-          set_led(0, 0, 255);
-          Serial.write(INIT_RESPONSE);
-          Serial.write(NEWLINE);
-          break;
-        }        
       }
 
       // See if a blink command has been sent
-      if (strlen(buffer) > 3 && buffer[0] == BLINK_MESSAGE[0] && buffer[1] == BLINK_MESSAGE[1]) {
+      int i1;
+      if (sscanf(buffer, BLINK_MESSAGE, &i1) == 1) {
         blink_led_count += 9;
       }
     } else {
@@ -129,7 +134,7 @@ void loop() {
     // See if an LED strip command had been sent
     else if (strlen(buffer) > 8 && buffer[0] == LED_STRIP_SOLID[0]) {
       char location;
-      uint32_t num, strip_r, strip_g, strip_b = 0;
+      uint16_t num, strip_r, strip_g, strip_b = 0;
       if (buffer[1] == LED_STRIP_SOLID[1]) {
         // Need to parse the data in using sscanf
         sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
@@ -151,7 +156,7 @@ void loop() {
     // See if a fan command has been sent
     } else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
       // Parse in the data
-      uint8_t fan_num, motor_val = 0;
+      uint16_t fan_num, motor_val = 0;
       sscanf(buffer, BALL_RETURN_CONTROL, &fan_num, &motor_val);
 
       // Once parsed, send it
@@ -175,10 +180,10 @@ void loop() {
   
   // Next, handle scoring
   process_scoring(&send_usbser);
-  delay(50); // might need to cut this down more
+  delay(25); // might need to cut this down more
 }
 
 static void _reset() {
-  asm volatile ("  jmp 0");
+  asm volatile("  jmp 0");
 }
 

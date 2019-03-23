@@ -9,6 +9,7 @@
 #include "i2c.hpp"
 #include "scoring.hpp"
 #include "usbserial.hpp"
+#include "usbser_constants.hpp"
 
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
@@ -26,6 +27,7 @@ static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, N
  */
 static void delay_alt(long ms) {
   uint64_t goaltime = millis() + ms;
+  
   // Start by getting controller data sent and write it to Serial
   process_i2c(&send_usbser);
   
@@ -114,5 +116,31 @@ void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_
 void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
   strip.setPixelColor(num, r, g, b);
   strip.show();  
+}
+
+
+/**
+ * @inherit-doc
+ */
+void check_serial_led(char* buffer) {
+  char location;
+  uint16_t num, strip_r, strip_g, strip_b = 0;
+  if (buffer[1] == LED_STRIP_SOLID[1]) {
+    // Need to parse the data in using sscanf
+    sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
+    set_led_strip_solid(location, strip_r, strip_g, strip_b);
+  } else if (buffer[1] == LED_STRIP_WAVE[1]) {
+    // Need to parse the data in using sscanf
+    sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
+    set_led_strip_wave(location, strip_r, strip_g, strip_b);
+  } else if (buffer[1] == LED_STRIP_NUM[1]) {
+    // Need to parse the data in using sscanf
+    sscanf(buffer, LED_STRIP_NUM, &location, &num, &strip_r, &strip_g, &strip_b);
+    set_led_strip_part(location, num, strip_r, strip_g, strip_b);        
+  } else if (buffer[1] == LED_STRIP_ONE[1]) {
+    // Need to parse the data in using sscanf
+    sscanf(buffer, LED_STRIP_ONE, &num, &strip_r, &strip_g, &strip_b);
+    set_led_strip_one(num, strip_r, strip_g, strip_b);        
+  }
 }
 

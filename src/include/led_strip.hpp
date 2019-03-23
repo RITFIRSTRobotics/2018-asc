@@ -56,5 +56,12 @@ void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_
  */
 void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
 
+/**
+ * Check Serial over USB for LED commands
+ * 
+ * @param buffer the data read 
+ */
+void check_serial_led(char* buffer);
+
 #endif
 

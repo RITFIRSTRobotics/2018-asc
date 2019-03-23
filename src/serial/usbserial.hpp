@@ -8,13 +8,20 @@
 #ifndef _usbserial_asc
 #define _usbserial_asc
 
+#define SERIAL_BUFFER_SIZE 128
+
 /**
  * Intialize Serial over USB
  */
 void init_usbser();
 
 /**
- * Transmit data
+ * Check Serial over USB for incoming data
+ */
+void check_usbser();
+
+/**
+ * Transmit data over Serial over USB
  * 
  * @note polls until data is sent
  */

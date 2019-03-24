@@ -15,7 +15,14 @@
 #include <stdlib.h>
 #include <Arduino.h>
 
-static void _reset();
+/**
+ * Reset the ASC
+ * 
+ * @note this will destroy the current state of the ASC
+ */
+static void _reset() {
+  asm volatile("  jmp 0");
+}
 
 /**
  * @inherit-doc
@@ -88,14 +95,5 @@ void send_usbser(char * data) {
       delay(10); // Delay to let the Serial data transmit
     }
   }
-}
-
-/**
- * Reset the ASC
- * 
- * @note this will destroy the current state of the ASC
- */
-static void _reset() {
-  asm volatile("  jmp 0");
 }
 

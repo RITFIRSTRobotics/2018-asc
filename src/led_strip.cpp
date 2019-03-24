@@ -14,7 +14,9 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
+//#define LED_NUM 104
 #define LED_NUM 15
+#define LED_INCREMENT 5 /*changing this value may cause overflow/underflow*/
 
 static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, NEO_GRB + NEO_KHZ800);
 
@@ -118,6 +120,34 @@ void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
   strip.show();  
 }
 
+void autowave_start(uint8_t r, uint8_t g, uint8_t b) {
+
+  // Loop through the colors
+  for (int i = 0; i < LED_NUM; i += 1) {
+    // Generate a new color
+    if (r == 255 && b == 0 && g < 255) {
+      g += LED_INCREMENT;
+    } else if (g == 255 && b == 0 && r > 0) {
+      r -= LED_INCREMENT;
+    } else if (r == 0 && g == 0 && b < 255) {
+      b += LED_INCREMENT;
+    } else if (r == 0 && b == 255 && g > 0) {
+      g -= LED_INCREMENT;    
+    } else if (g == 0 && b == 255 && r < 255) {
+      r += LED_INCREMENT;
+    } else if (r == 255 && g == 0 && b > 0) {
+      b -= LED_INCREMENT;
+    }
+
+    
+    
+
+    
+  }
+
+  
+  
+}
 
 /**
  * @inherit-doc
@@ -125,22 +155,28 @@ void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
 void check_serial_led(char* buffer) {
   char location;
   uint16_t num, strip_r, strip_g, strip_b = 0;
-  if (buffer[1] == LED_STRIP_SOLID[1]) {
-    // Need to parse the data in using sscanf
-    sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
-    set_led_strip_solid(location, strip_r, strip_g, strip_b);
-  } else if (buffer[1] == LED_STRIP_WAVE[1]) {
-    // Need to parse the data in using sscanf
-    sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
-    set_led_strip_wave(location, strip_r, strip_g, strip_b);
-  } else if (buffer[1] == LED_STRIP_NUM[1]) {
-    // Need to parse the data in using sscanf
-    sscanf(buffer, LED_STRIP_NUM, &location, &num, &strip_r, &strip_g, &strip_b);
-    set_led_strip_part(location, num, strip_r, strip_g, strip_b);        
-  } else if (buffer[1] == LED_STRIP_ONE[1]) {
-    // Need to parse the data in using sscanf
-    sscanf(buffer, LED_STRIP_ONE, &num, &strip_r, &strip_g, &strip_b);
-    set_led_strip_one(num, strip_r, strip_g, strip_b);        
+
+  // Find the matching LED command
+  if (buffer[0] == LED_STRIP_SOLID[0]) {
+    if (buffer[1] == LED_STRIP_SOLID[1]) {
+      sscanf(buffer, LED_STRIP_SOLID, &location, &strip_r, &strip_g, &strip_b);
+      set_led_strip_solid(location, strip_r, strip_g, strip_b);
+    } else if (buffer[1] == LED_STRIP_WAVE[1]) {
+      sscanf(buffer, LED_STRIP_WAVE, &location, &strip_r, &strip_g, &strip_b);
+      set_led_strip_wave(location, strip_r, strip_g, strip_b);
+    } else if (buffer[1] == LED_STRIP_NUM[1]) {
+      sscanf(buffer, LED_STRIP_NUM, &location, &num, &strip_r, &strip_g, &strip_b);
+      set_led_strip_part(location, num, strip_r, strip_g, strip_b);        
+    } else if (buffer[1] == LED_STRIP_ONE[1]) {
+      sscanf(buffer, LED_STRIP_ONE, &num, &strip_r, &strip_g, &strip_b);
+      set_led_strip_one(num, strip_r, strip_g, strip_b);        
+    }
+  // LED autowave commands
+  } else if (buffer[0] == LED_STRIP_AUTOWAVE_START[0]) {
+    if (buffer[1] == LED_STRIP_AUTOWAVE_START[1]) {
+      sscanf(buffer, LED_STRIP_AUTOWAVE_START, &strip_r, &strip_g, &strip_b);
+      
+    }
   }
 }
 

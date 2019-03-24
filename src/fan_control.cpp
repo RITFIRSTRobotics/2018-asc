@@ -24,7 +24,7 @@ void init_fans() {
  */
 void set_ball_fan(uint8_t fan, uint8_t speed) {
   // Make sure to check for bounds
-  if (fan < sizeof(FAN_PWM_PINS)) {
+  if (0 < fan && fan < sizeof(FAN_PWM_PINS)) {
     analogWrite(FAN_PWM_PINS[fan], speed);
   }
 }

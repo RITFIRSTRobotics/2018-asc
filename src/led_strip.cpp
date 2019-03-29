@@ -20,6 +20,7 @@
 
 static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, NEO_GRB + NEO_KHZ800);
 static uint64_t goaltime = 0;
+static uint8_t remaining_cycles = 0;
 
 /**
  * Delay the CPU while doing stuff in the background (sending controller data and scoring)
@@ -31,7 +32,7 @@ static uint64_t goaltime = 0;
 static void delay_alt(uint64_t ms) {
   goaltime = millis() + ms;
 
-  while (goaltime > millis()) {
+  while (goaltime > millis() && remaining_cycles != 0) {
     // See if there is incoming data
     if (Serial.available() > 0) {
       check_usbser();
@@ -46,6 +47,8 @@ static void delay_alt(uint64_t ms) {
     // Sleep a little
     delay(10);
   }
+
+  goaltime = 0;
 }
 
 /**
@@ -92,19 +95,36 @@ static void set_led_strip_solid(char location, uint8_t r, uint8_t g, uint8_t b) 
  */
 static void set_led_strip_wave(char location, uint8_t r, uint8_t g, uint8_t b) {
   // Case for close LEDs
+  remaining_cycles = LED_NUM / 2;
   if (location == 'c') {
-    for (int i = 0; i < LED_NUM / 2; i += 1) {
-      strip.setPixelColor(i, r, g, b);
+    while (true) {
+      // Set the LED
+      strip.setPixelColor((LED_NUM / 2) - remaining_cycles, r, g, b);
       delay_alt(50);
       strip.show();
+
+      // Move to the next LED or stop looping
+      if (remaining_cycles == 0) {
+        break;
+      } else {
+        remaining_cycles -= 1;
+      }
     }
   }
   // Case for far LEDs
   if (location == 'f') {
-    for (int i = LED_NUM / 2; i < LED_NUM; i += 1) {
-      strip.setPixelColor(i, r, g, b);
+    while (true) {
+      // Set the LED
+      strip.setPixelColor(LED_NUM - remaining_cycles, r, g, b);
       delay_alt(50);
       strip.show();
+
+      // Move to the next LED or stop looping
+      if (remaining_cycles == 0) {
+        break;
+      } else {
+        remaining_cycles -= 1;
+      }
     }
   }
 }
@@ -179,7 +199,8 @@ static void autowave_run(uint8_t r, uint8_t g, uint8_t b) {
   }
 
   // Loop through the colors
-  for (int i = 0; i < LED_NUM; i += 1) {
+  remaining_cycles = LED_NUM;
+  while (true) {
     // Generate a new color
     if (r == 255 && b == 0 && g < 255) {
       g += LED_INCREMENT;
@@ -195,10 +216,16 @@ static void autowave_run(uint8_t r, uint8_t g, uint8_t b) {
       b -= LED_INCREMENT;
     }
 
-    // Set the pixel
-    strip.setPixelColor(i, r, g, b);
-
+    // Set the pixel and wait (while still processing input)
+    strip.setPixelColor(LED_NUM - remaining_cycles, r, g, b);
     delay_alt(LED_DELAY);
+
+    // See if we should continue
+    if (remaining_cycles == 0) {
+      break;
+    } else {
+      remaining_cycles -= 1;
+    }
   }
 
   autowave_return(r, g, b);
@@ -231,6 +258,8 @@ void check_serial_led(char* buffer) {
     if (buffer[1] == LED_STRIP_AUTOWAVE_START[1]) {
       sscanf(buffer, LED_STRIP_AUTOWAVE_START, &strip_r, &strip_g, &strip_b);
       autowave_run(strip_r, strip_g, strip_b);
+    } else if (buffer[1] == LED_STRIP_AUTOWAVE_STOP[1]) {
+      sscanf(buffer, LED_STRIP_AUTOWAVE_STOP, &num);
     }
   }
 }

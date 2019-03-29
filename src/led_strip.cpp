@@ -14,11 +14,12 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-//#define LED_NUM 104
-#define LED_NUM 15
-#define LED_INCREMENT 5 /*changing this value may cause overflow/underflow*/
+#define LED_NUM 15 // 104
+#define LED_INCREMENT 5 // changing this value may cause overflow/underflow
+#define LED_DELAY 75 // same as old FMS code, may need to be adjusted
 
 static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, NEO_GRB + NEO_KHZ800);
+static uint64_t goaltime = 0;
 
 /**
  * Delay the CPU while doing stuff in the background (sending controller data and scoring)
@@ -27,16 +28,22 @@ static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, N
  * @note the background stuff is done, then the CPU waits for the time to elapse, because of this
  *       this is not a suitable method for really short or long delays
  */
-static void delay_alt(long ms) {
-  uint64_t goaltime = millis() + ms;
-  
-  // Start by getting controller data sent and write it to Serial
-  process_i2c(&send_usbser);
-  
-  // Next, handle scoring
-  process_scoring(&send_usbser);
+static void delay_alt(uint64_t ms) {
+  goaltime = millis() + ms;
 
-  while (goaltime > millis() && millis() > 100) {
+  while (goaltime > millis()) {
+    // See if there is incoming data
+    if (Serial.available() > 0) {
+      check_usbser();
+    }
+        
+    // Start by getting controller data sent and write it to Serial
+    process_i2c(&send_usbser);
+    
+    // Next, handle scoring
+    process_scoring(&send_usbser);
+
+    // Sleep a little
     delay(10);
   }
 }
@@ -51,9 +58,14 @@ void init_led_strip() {
 }
 
 /**
- * @inherit-doc
+ * Set the LED strip to a color
+ * 
+ * @param location 'c' for close, 'f' for far
+ * @param r red value
+ * @param g green value
+ * @param b blue value
  */
-void set_led_strip_solid(char location, uint8_t r, uint8_t g, uint8_t b) {
+static void set_led_strip_solid(char location, uint8_t r, uint8_t g, uint8_t b) {
   // Case for close LEDs
   if (location == 'c') {
     for (int i = 0; i < LED_NUM / 2; i += 1) {
@@ -71,9 +83,14 @@ void set_led_strip_solid(char location, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 /**
- * @inherit-doc
+ * Set the LED strip to a color in a wave configuration
+ * 
+ * @param location 'c' for close, 'f' for far
+ * @param r red value
+ * @param g green value
+ * @param b blue value
  */
-void set_led_strip_wave(char location, uint8_t r, uint8_t g, uint8_t b) {
+static void set_led_strip_wave(char location, uint8_t r, uint8_t g, uint8_t b) {
   // Case for close LEDs
   if (location == 'c') {
     for (int i = 0; i < LED_NUM / 2; i += 1) {
@@ -93,9 +110,15 @@ void set_led_strip_wave(char location, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 /**
- * @inherit-doc
+ * Set part of the LED strip to a color
+ * 
+ * @param location 'c' for close, 'f' for far
+ * @param num the number of LEDs to change
+ * @param r red value
+ * @param g green value
+ * @param b blue value
  */
-void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
+static void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
   // Case for close LEDs
   if (location == 'c') {
     for (int i = 0; i < num; i += 1) {
@@ -113,14 +136,47 @@ void set_led_strip_part(char location, uint8_t num, uint8_t r, uint8_t g, uint8_
 }
 
 /**
- * @inherit-doc
+ * Set part of the LED strip to a color
+ * 
+ * @param num the number of the LED to change
+ * @param r red value
+ * @param g green value
+ * @param b blue value
  */
-void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
+static void set_led_strip_one(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
   strip.setPixelColor(num, r, g, b);
   strip.show();  
 }
 
-void autowave_start(uint8_t r, uint8_t g, uint8_t b) {
+/**
+ * Return the status of the automatically generated LEDs
+ *
+ * @param r the current red value
+ * @param g the current green value
+ * @param b the current blue value
+ */
+static void inline autowave_return(uint8_t r, uint8_t g, uint8_t b) {
+  // Generate the return string
+  char buffer[SERIAL_BUFFER_SIZE];
+  memset(buffer, 0, SERIAL_BUFFER_SIZE);
+  sprintf(buffer, LED_STRIP_AUTOWAVE_RESULTS, r, g, b);
+
+  send_usbser(buffer);
+  goaltime = 0;
+}
+
+/**
+ * Automatically generate colors for the LED strip
+ *
+ * @param r initial red value
+ * @param g initial green value
+ * @param b initial blue value
+ */
+static void autowave_run(uint8_t r, uint8_t g, uint8_t b) {
+  if (goaltime != 0) {
+    // Another autowave start command was sent, just ignore it
+    return;
+  }
 
   // Loop through the colors
   for (int i = 0; i < LED_NUM; i += 1) {
@@ -139,14 +195,13 @@ void autowave_start(uint8_t r, uint8_t g, uint8_t b) {
       b -= LED_INCREMENT;
     }
 
-    
-    
+    // Set the pixel
+    strip.setPixelColor(i, r, g, b);
 
-    
+    delay_alt(LED_DELAY);
   }
 
-  
-  
+  autowave_return(r, g, b);
 }
 
 /**
@@ -175,8 +230,7 @@ void check_serial_led(char* buffer) {
   } else if (buffer[0] == LED_STRIP_AUTOWAVE_START[0]) {
     if (buffer[1] == LED_STRIP_AUTOWAVE_START[1]) {
       sscanf(buffer, LED_STRIP_AUTOWAVE_START, &strip_r, &strip_g, &strip_b);
-      
+      autowave_run(strip_r, strip_g, strip_b);
     }
   }
 }
-

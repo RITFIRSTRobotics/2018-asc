@@ -52,25 +52,30 @@ void check_usbser() {
     // Calibrate the specified goal
     update_threshold(buffer[3] - '0');
   }
+  
   // See if an LED strip command had been sent
   else if (strlen(buffer) > 8 && (buffer[0] == LED_STRIP_SOLID[0] || buffer[0] == LED_STRIP_AUTOWAVE_START[0])) {
     check_serial_led(buffer);
-   
+  }  
+ 
   // See if a fan command has been sent
-  } else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
+  else if (strlen(buffer) > 3 && buffer[0] == BALL_RETURN_CONTROL[0] && buffer[1] == BALL_RETURN_CONTROL[1]) {
     // Parse in the data
     uint16_t fan_num, motor_val = 0;
     sscanf(buffer, BALL_RETURN_CONTROL, &fan_num, &motor_val);
     // Once parsed, send it
     set_ball_fan(fan_num, motor_val);
+  }
+    
   // See if someone tried to reinitialize the ASC
-  } else if (strlen(buffer) > 3 && ((buffer[0] == INIT_MESSAGE[0] && buffer[1] == INIT_MESSAGE[1]) || (buffer[0] == BLINK_MESSAGE[0] && buffer[1] == BLINK_MESSAGE[1]))) {
+  else if (strlen(buffer) >= 3 && ((buffer[0] == INIT_MESSAGE[0] && buffer[1] == INIT_MESSAGE[1]) || (buffer[0] == BLINK_MESSAGE[0] && buffer[1] == BLINK_MESSAGE[1]))) {
     // Blink the LED
     set_led(0, 0, 0);
     for (int i = 0; i < 3; i += 1) {
       set_led(255, 255, 255, 200);
       set_led(0, 0, 0, 300);
     }
+    delay(500);
     
     _reset();
   }

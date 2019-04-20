@@ -61,10 +61,12 @@ void process_i2c(void (*swrite)(char *)) {
     int j = 0;
     
     // Read in data (into the buffer)
-    while (Wire.available()) {
+    while (Wire.available() && j < I2CDATA_BUFFER_LEN) {
       buffer[j] = Wire.read();
       j += 1;
     }
+    // NUL terminate
+    buffer[j + 1] = 0;
 
     // Use the function pointer to write to wherever
     (*swrite)(buffer);

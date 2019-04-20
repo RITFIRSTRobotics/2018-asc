@@ -14,9 +14,9 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define LED_NUM 15 // 104
+#define LED_NUM 106
 #define LED_INCREMENT 5 // changing this value may cause overflow/underflow
-#define LED_DELAY 75 // same as old FMS code, may need to be adjusted
+#define LED_DELAY 80 // same as old FMS code, may need to be adjusted
 
 static Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUM, LED_STRIP_CONTROL, NEO_GRB + NEO_KHZ800);
 static uint64_t goaltime = 0;
@@ -206,7 +206,7 @@ static void autowave_run(uint8_t r, uint8_t g, uint8_t b) {
       g += LED_INCREMENT;
     } else if (g == 255 && b == 0 && r > 0) {
       r -= LED_INCREMENT;
-    } else if (r == 0 && g == 0 && b < 255) {
+    } else if (r == 0 && g == 255 && b < 255) {
       b += LED_INCREMENT;
     } else if (r == 0 && b == 255 && g > 0) {
       g -= LED_INCREMENT;    
@@ -218,6 +218,7 @@ static void autowave_run(uint8_t r, uint8_t g, uint8_t b) {
 
     // Set the pixel and wait (while still processing input)
     strip.setPixelColor(LED_NUM - remaining_cycles, r, g, b);
+    strip.show();
     delay_alt(LED_DELAY);
 
     // See if we should continue
@@ -260,6 +261,7 @@ void check_serial_led(char* buffer) {
       autowave_run(strip_r, strip_g, strip_b);
     } else if (buffer[1] == LED_STRIP_AUTOWAVE_STOP[1]) {
       sscanf(buffer, LED_STRIP_AUTOWAVE_STOP, &num);
+      remaining_cycles = num;
     }
   }
 }

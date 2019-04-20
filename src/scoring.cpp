@@ -14,99 +14,70 @@
 #include <string.h>
 #include <Arduino.h>
 
-// Store the threshold needed for a goal to be detected
-static uint16_t _goal0_threshold = DEFAULT_THRESHOLD;
-static uint16_t _goal1_threshold = DEFAULT_THRESHOLD;
-static uint16_t _goal2_threshold = DEFAULT_THRESHOLD;
-static uint16_t _goal3_threshold = DEFAULT_THRESHOLD;
+#define SCORING_BUFFER_LENGTH 16
+#define NUM_SENSORS 4
+#define NUM_READINGS 3
 
-// Store the previous goal state (so that a goal only gets recorded once)
-static bool _goal0_prev = false;
-static bool _goal1_prev = false;
-static bool _goal2_prev = false;
-static bool _goal3_prev = false;
+// Define a struct to save data about each scoring sensor
+typedef struct {
+  uint8_t pin;
+  bool scored;
+  uint16_t threshold;
+  uint16_t readings[NUM_READINGS];
+} SensorData;
+
+// Make an array of sensors
+static SensorData sensors[NUM_SENSORS] = {
+  {SCORE_SENSOR0, false, DEFAULT_THRESHOLD, {0, 0, 0}},
+  {SCORE_SENSOR1, false, DEFAULT_THRESHOLD, {0, 0, 0}},
+  {SCORE_SENSOR2, false, DEFAULT_THRESHOLD, {0, 0, 0}},
+  {SCORE_SENSOR3, false, DEFAULT_THRESHOLD, {0, 0, 0}}			
+};
 
 /**
  * @inherit-doc
  */
 void init_scoring() {
-  pinMode(SCORE_SENSOR0, INPUT);
-  pinMode(SCORE_SENSOR1, INPUT);
-  pinMode(SCORE_SENSOR2, INPUT);
-  pinMode(SCORE_SENSOR3, INPUT);
+  for (int i = 0; i < NUM_SENSORS; i += 1) {
+    pinMode(sensors[i].pin, INPUT);
+  }
 }
 
 /**
  * @inherit-doc
  */
 void update_threshold(uint8_t goal_num) {
-  // Figures out the goal number, then makes the threshold a little higher than it
-  switch(goal_num) {
-    case 0:
-      _goal0_threshold = THRESHOLD_MULTIPLIER * analogRead(SCORE_SENSOR0);
-      break;
-    case 1:
-      _goal1_threshold = THRESHOLD_MULTIPLIER * analogRead(SCORE_SENSOR1);
-      break;
-    case 2:
-      _goal2_threshold = THRESHOLD_MULTIPLIER * analogRead(SCORE_SENSOR2);
-      break;
-    case 3:
-      _goal3_threshold = THRESHOLD_MULTIPLIER * analogRead(SCORE_SENSOR3);
-      break;
-  }
+  sensors[goal_num].threshold = THRESHOLD_MULTIPLIER * analogRead(sensors[goal_num].pin);
 }
 
 /**
  * @inherit-doc
  */
 void process_scoring(void (*swrite)(char *)) {
-  // Check each goal, can't really loop in case the pins aren't in order (unknown at the time of writing)
-  char buffer[8];
-  memset(buffer, 0, 8); // clear the buffer
+  // Setup a buffer
+  char buffer[SCORING_BUFFER_LENGTH];
+  memset(buffer, 0, SCORING_BUFFER_LENGTH); // clear the buffer
 
-  if ((uint16_t) analogRead(SCORE_SENSOR0) <= _goal0_threshold) {
-    if (!_goal0_prev) {
-      // Print data to a buffer, then use the given function
-      sprintf(buffer, SCORE_DATA, 0);
-      (*swrite)(buffer);
-      _goal0_prev = true;
+  // Update all the readings and process goals that are now marked as scored
+  for (int i = 0; i < NUM_SENSORS; i += 1) {
+    // Shift data down in the array and the new data in
+    sensors[i].readings[0] = sensors[i].readings[1];
+    sensors[i].readings[1] = sensors[i].readings[2];
+    sensors[i].readings[2] = analogRead(sensors[i].pin);
+
+    // Check the readings to see if this is scored
+    boolean s = true;
+    for (int j = 0; j < NUM_READINGS; j += 1) {
+      s = s && (sensors[i].readings[j] >= sensors[i].threshold);
     }
-  } else {
-    _goal0_prev = false;
-  }
-  
-  if ((uint16_t) analogRead(SCORE_SENSOR1) <= _goal1_threshold) {
-    if (!_goal1_prev) {
-      // Print data to a buffer, then use the given function
-      sprintf(buffer, SCORE_DATA, 1);
+
+    // See if there's a state change
+    if (sensors[i].scored && !s) {
+      sensors[i].scored = false;
+    } else if (!sensors[i].scored && s) {
+      sensors[i].scored = true;
+      sprintf(buffer, SCORE_DATA, i);
       (*swrite)(buffer);
-      _goal1_prev = true;
     }
-  } else {
-    _goal1_prev = false;
-  }
-  
-  if ((uint16_t) analogRead(SCORE_SENSOR2) <= _goal2_threshold) {
-    if (!_goal2_prev) {
-      // Print data to a buffer, then use the given function
-      sprintf(buffer, SCORE_DATA, 2);
-      (*swrite)(buffer);
-      _goal2_prev = true;
-    }
-  } else {
-    _goal2_prev = false;
-  }
-  
-  if ((uint16_t) analogRead(SCORE_SENSOR3) <= _goal3_threshold) {
-    if (!_goal3_prev) {
-      // Print data to a buffer, then use the given function
-      sprintf(buffer, SCORE_DATA, 3);
-      (*swrite)(buffer);
-      _goal3_prev = true;
-    }
-  } else {
-    _goal3_prev = false;
   }
 }
-

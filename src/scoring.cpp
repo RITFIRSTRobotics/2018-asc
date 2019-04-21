@@ -16,7 +16,7 @@
 
 #define SCORING_BUFFER_LENGTH 16
 #define NUM_SENSORS 4
-#define NUM_READINGS 3
+#define NUM_READINGS 4
 
 // Define a struct to save data about each scoring sensor
 typedef struct {
@@ -28,10 +28,10 @@ typedef struct {
 
 // Make an array of sensors
 static SensorData sensors[NUM_SENSORS] = {
-  {SCORE_SENSOR0, false, DEFAULT_THRESHOLD, {0, 0, 0}},
-  {SCORE_SENSOR1, false, DEFAULT_THRESHOLD, {0, 0, 0}},
-  {SCORE_SENSOR2, false, DEFAULT_THRESHOLD, {0, 0, 0}},
-  {SCORE_SENSOR3, false, DEFAULT_THRESHOLD, {0, 0, 0}}			
+  {SCORE_SENSOR0, false, DEFAULT_THRESHOLD, {0, 0, 0, 0}},
+  {SCORE_SENSOR1, false, DEFAULT_THRESHOLD, {0, 0, 0, 0}},
+  {SCORE_SENSOR2, false, DEFAULT_THRESHOLD, {0, 0, 0, 0}},
+  {SCORE_SENSOR3, false, DEFAULT_THRESHOLD, {0, 0, 0, 0}}			
 };
 
 /**
@@ -48,6 +48,8 @@ void init_scoring() {
  */
 void update_threshold(uint8_t goal_num) {
   sensors[goal_num].threshold = THRESHOLD_MULTIPLIER * analogRead(sensors[goal_num].pin);
+  Serial.print("threshold: ");
+  Serial.println(sensors[goal_num].threshold);
 }
 
 /**
@@ -68,7 +70,7 @@ void process_scoring(void (*swrite)(char *)) {
     // Check the readings to see if this is scored
     boolean s = true;
     for (int j = 0; j < NUM_READINGS; j += 1) {
-      s = s && (sensors[i].readings[j] >= sensors[i].threshold);
+      s = s && (sensors[i].readings[j] <= sensors[i].threshold);
     }
 
     // See if there's a state change

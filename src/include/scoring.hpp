@@ -10,8 +10,8 @@
 
 #include <stdint.h>
 
-#define DEFAULT_THRESHOLD 512
-#define THRESHOLD_MULTIPLIER 1.2
+#define DEFAULT_THRESHOLD 1000
+#define THRESHOLD_MULTIPLIER 1.1
 
 /**
  * Initialize the scoring sub-system
